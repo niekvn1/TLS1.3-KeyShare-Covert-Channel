@@ -7,7 +7,7 @@ from Covert import COVERT_KEY_LENGTHS, SYMMETRIC_KEY
 import socket
 
 class CovertServer:
-    def __init__(self, servername, port, key, validKey=True, encrypt=True, symkey=SYMMETRIC_KEY):
+    def __init__(self, servername, port, key=None, validKey=True, encrypt=True, symkey=SYMMETRIC_KEY):
         self.key = key
         self.validKey = validKey
         self.encrypt = encrypt
@@ -168,24 +168,13 @@ def rawOutput(interface, cs):
         rawSocket.send(frame)
 
 
-def rawTest():
-    msg = b'\x45\x00\
-\x00\x21\x0a\xf9\x40\x00\x38\x11\x16\xac\x4d\xa7\xd9\xa5\x91\x64\
-\x68\x76\x94\x70\x13\x89\x00\x0d\x5e\xd1\x68\x6f\x65\x72\x0a'
-    rawSocket = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_UDP)
-    rawSocket.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
-    # rawSocket.bind(('eno1', 0))
-    print(rawSocket.sendto(msg, ("10.0.0.2", 0)))
-
-
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='TLS 1.3 Covert Channel')
     parser.add_argument('--encrypt', action='store_true', help='Enable encryption')
-    parser.add_argument('--key', action='store_true', help='Use one public key as an actual TLS key')
+    # parser.add_argument('--key', action='store_true', help='Use one public key as an actual TLS key') #TODO: implement this
     args = parser.parse_args()
 
-    key = loadPublicKey(SUPPORTED_GROUP_X25519, "client_crypto/x25519public.key.pem")
     cs = CovertServer("10.0.1.25", 44330, key, validKey=args.key, encrypt=args.encrypt)
     rawOutput("lo", cs)
