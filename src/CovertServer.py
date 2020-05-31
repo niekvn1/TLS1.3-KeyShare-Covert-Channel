@@ -182,5 +182,5 @@ if __name__ == "__main__":
         print("Usage: python3 CovertServer.py -b <bind to IP/Domain> -p <port> [--encrypt]")
         exit(1)
 
-    cs = CovertServer(args.bind, 44330, validKey=False, encrypt=args.encrypt)
+    cs = CovertServer(args.bind, args.port, validKey=False, encrypt=args.encrypt)
     rawOutput("lo", cs)
