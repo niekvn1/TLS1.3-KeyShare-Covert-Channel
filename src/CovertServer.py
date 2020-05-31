@@ -176,5 +176,5 @@ if __name__ == "__main__":
     # parser.add_argument('--key', action='store_true', help='Use one public key as an actual TLS key') #TODO: implement this
     args = parser.parse_args()
 
-    cs = CovertServer("10.0.1.25", 44330, key, validKey=args.key, encrypt=args.encrypt)
+    cs = CovertServer("10.0.1.25", 44330, validKey=args.key, encrypt=args.encrypt)
     rawOutput("lo", cs)
