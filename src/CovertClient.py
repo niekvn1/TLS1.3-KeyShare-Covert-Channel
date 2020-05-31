@@ -198,11 +198,6 @@ class CovertClient:
 
         return fragments
 
-    def send(self, byteArray):
-        fragments = self.__fragment__(byteArray)
-        for f in fragments:
-            self.__hello__(f)
-
     def recv(self):
         record = self.tlsClient.recv()
         if record is None:
@@ -212,7 +207,7 @@ class CovertClient:
             self.tlsClient.close()
             return record
 
-    def sendrecv(self, byteArray):
+    def send(self, byteArray):
         fragments = self.__fragment__(byteArray)
         if self.verbose:
             print(f"Sending {len(byteArray)} bytes...")
@@ -271,11 +266,11 @@ def rawInput(interface, cc):
             continue
 
         prototype, packet = tmp
-        cc.sendrecv(packet)
+        cc.send(packet)
 
 
 def test(cc, msg):
-    cc.sendrecv(bytes(msg, 'UTF-8'))
+    cc.send(bytes(msg, 'UTF-8'))
 
 
 if __name__ == "__main__":

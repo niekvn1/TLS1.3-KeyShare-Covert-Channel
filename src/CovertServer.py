@@ -111,17 +111,6 @@ class CovertServer:
         return withpadding[paddingBytes:], False
 
     def recv(self):
-        socket, address = self.tlsServer.accept()
-        record = self.tlsServer.recv(socket)
-        if record is None:
-            return None
-        elif record.getType() == TLS_HANDSHAKE_RECORD_TYPE and \
-                record.getHandshakeType() == HANDSHAKE_TYPE_CLIENT_HELLO:
-
-            byteArray, expecting_more = self.__covertMessage__(record)
-            return socket, byteArray
-
-    def recvfail(self):
         expecting_more = True
         msgs = []
         while expecting_more:
@@ -149,7 +138,7 @@ def rawOutput(interface, cs):
     rawSocket.bind((interface, 0))
     count = 0
     while True:
-        data = cs.recvfail()
+        data = cs.recv()
         count += 1
         frame = b'\x00\x00\x00\x00\x00\x00' + b'\x00\x00\x00\x00\x00\x00' + ethertype + data
         rawSocket.send(frame)
@@ -158,7 +147,7 @@ def rawOutput(interface, cs):
 def testMode(cs):
     count = 0
     while True:
-        data = cs.recvfail()
+        data = cs.recv()
         count += 1
         print(data.decode('UTF-8'))
 
