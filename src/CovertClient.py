@@ -218,21 +218,6 @@ class CovertClient:
             self.recv()
 
 
-    def localhostInput(self, address, port):
-        connSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        connSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        connSocket.bind((address, port))
-        connSocket.listen(1)
-        inputSocket, address = connSocket.accept()
-        while True:
-            data = inputSocket.recv(2048)
-            if data == b'':
-                inputSocket.close()
-                return
-
-            self.send(data)
-
-
 # class ifreq(ctypes.Structure):
 #     """
 #     Source: https://github.com/zeigotaro/python-sniffer/blob/master/snifferCore.py
@@ -298,9 +283,14 @@ if __name__ == "__main__":
     parser.add_argument('--key', action='store_true', help='Use one public key as an actual TLS key')
     parser.add_argument('-g', '--group', action='append')
     parser.add_argument('--test', action='store_true', help='Send a test message')
+    parser.add_argument('-s', '--server', help='The server IP or domain.')
+    parser.add_argument('-p', '--port', type=int, choices=range(1, 65536), help='The server port.')
     args = parser.parse_args()
 
-    if args.group is None:
+    if args.server is None or args.port is None:
+        print("Usage: python3 CovertClient.py -s <server IP/Domain> -p <server port> [--encrypt] -g <group> -g <group> -g ...")
+        exit(1)
+    elif args.group is None:
         supportedGroups = SUPPORTED_GROUPS
     else:
         supportedGroups = []
@@ -310,7 +300,7 @@ if __name__ == "__main__":
                 exit(1)
             supportedGroups.append(NAME_TO_GROUP_MAP[group])
 
-    cc = CovertClient("10.0.1.25", 44330, key=args.key, encrypt=args.encrypt, groups=supportedGroups)
+    cc = CovertClient(args.server, args.port, key=args.key, encrypt=args.encrypt, groups=supportedGroups)
     if args.test:
         test(cc)
     else:

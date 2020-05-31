@@ -174,7 +174,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='TLS 1.3 Covert Channel')
     parser.add_argument('--encrypt', action='store_true', help='Enable encryption')
     # parser.add_argument('--key', action='store_true', help='Use one public key as an actual TLS key') #TODO: implement this
+    parser.add_argument('-b', '--bind', help='The server IP or domain.')
+    parser.add_argument('-p', '--port', help='The server port.')
     args = parser.parse_args()
 
-    cs = CovertServer("10.0.1.25", 44330, validKey=False, encrypt=args.encrypt)
+    if args.bind is None or args.port is None:
+        print("Usage: python3 CovertServer.py -b <bind to IP/Domain> -p <port> [--encrypt]")
+        exit(1)
+
+    cs = CovertServer(args.bind, 44330, validKey=False, encrypt=args.encrypt)
     rawOutput("lo", cs)

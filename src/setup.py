@@ -16,13 +16,6 @@ def deleteInterface(name):
     subprocess.call(["ip", "link", "del", name])
 
 
-def stdin(address, port):
-    inputSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    inputSocket.connect((address, port))
-    for line in sys.stdin:
-        inputSocket.send(line.encode('ASCII'))
-
-
 def client():
     createInterface("tlsc", "10.0.0.1/24")
 
@@ -42,9 +35,7 @@ def cleanServer():
 if __name__ == "__main__":
     l = len(sys.argv)
     if l >= 2:
-        if sys.argv[1] == "stdin":
-            stdin("10.0.0.1", 5001)
-        elif sys.argv[1] == "client":
+        if sys.argv[1] == "client":
             if l == 3 and sys.argv[2] == "clean":
                 cleanClient()
             else:
@@ -55,4 +46,4 @@ if __name__ == "__main__":
             else:
                 server()
     else:
-        print("Usage: python3 setup.py <client/server/stdin> [<clean>]")
+        print("Usage: python3 setup.py <client/server> [clean]")
