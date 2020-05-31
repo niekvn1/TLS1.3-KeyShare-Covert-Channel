@@ -16,16 +16,16 @@ def deleteInterface(name):
     subprocess.call(["ip", "link", "del", name])
 
 
-def client():
-    createInterface("tlsc", "10.0.0.1/24")
+def client(ip):
+    createInterface("tlsc", ip)
 
 
 def cleanClient():
     deleteInterface("tlsc")
 
 
-def server():
-    createInterface("tlsc", "10.0.0.2/24")
+def server(ip):
+    createInterface("tlsc", ip)
 
 
 def cleanServer():
@@ -39,11 +39,13 @@ if __name__ == "__main__":
             if l == 3 and sys.argv[2] == "clean":
                 cleanClient()
             else:
-                client()
+                client(sys.argv[2])
         elif sys.argv[1] == "server":
             if l == 3 and sys.argv[2] == "clean":
                 cleanServer()
             else:
-                server()
+                server(sys.argv[2])
     else:
-        print("Usage: python3 setup.py <client/server> [clean]")
+        print("Usage: python3 setup.py client/server [<IP>] [clean]")
+        print("Example: python3 setup.py client 10.0.0.1/24")
+        print("Example: python3 setup.py client clean")
