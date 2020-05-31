@@ -175,7 +175,7 @@ if __name__ == "__main__":
     parser.add_argument('--encrypt', action='store_true', help='Enable encryption')
     # parser.add_argument('--key', action='store_true', help='Use one public key as an actual TLS key') #TODO: implement this
     parser.add_argument('-b', '--bind', help='The server IP or domain.')
-    parser.add_argument('-p', '--port', help='The server port.')
+    parser.add_argument('-p', '--port', type=int, choices=range(1, 65536), help='The server port.')
     args = parser.parse_args()
 
     if args.bind is None or args.port is None:
