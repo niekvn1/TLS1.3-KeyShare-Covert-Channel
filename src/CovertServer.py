@@ -7,7 +7,7 @@ from Covert import COVERT_KEY_LENGTHS, SYMMETRIC_KEY
 import socket
 
 class CovertServer:
-    def __init__(self, servername, port, key=None, validKey=True, encrypt=True, symkey=SYMMETRIC_KEY, verbose=False):
+    def __init__(self, servername, port, key=None, validKey=False, encrypt=True, symkey=SYMMETRIC_KEY, verbose=False):
         self.key = key
         self.validKey = validKey
         self.encrypt = encrypt
@@ -121,23 +121,6 @@ class CovertServer:
             byteArray, expecting_more = self.__covertMessage__(record)
             return socket, byteArray
 
-    # def recv(self):
-    #     socket, address = self.tlsServer.accept()
-    #     expecting_more = True
-    #     msgs = []
-    #     while expecting_more:
-    #         record = self.tlsServer.recv(socket)
-    #         if record is None:
-    #             print("Received None")
-    #             return None
-    #         elif record.getType() == TLS_HANDSHAKE_RECORD_TYPE and \
-    #                 record.getHandshakeType() == HANDSHAKE_TYPE_CLIENT_HELLO:
-    #
-    #             byteArray, expecting_more = self.__covertMessage__(record)
-    #             msgs.append(byteArray)
-    #
-    #     return socket, b''.join(msgs)
-
     def recvfail(self):
         expecting_more = True
         msgs = []
@@ -172,6 +155,14 @@ def rawOutput(interface, cs):
         rawSocket.send(frame)
 
 
+def testMode(cs):
+    count = 0
+    while True:
+        data = cs.recvfail()
+        count += 1
+        print(data.decode('UTF-8'))
+
+
 
 if __name__ == "__main__":
     import argparse
@@ -181,11 +172,15 @@ if __name__ == "__main__":
     parser.add_argument('-b', '--bind', help='The server IP or domain.')
     parser.add_argument('-p', '--port', type=int, choices=range(1, 65536), help='The server port.')
     parser.add_argument('-v', '--verbose', action='store_true', help='Output all (unencrypted) bytes received by the covert channel client to stdout')
+    parser.add_argument('-t', '--test', action='store_true', help='Test mode, will not redirect any incoming messages.')
     args = parser.parse_args()
 
     if args.bind is None or args.port is None:
         print("Usage: python3 CovertServer.py -b <bind to IP/Domain> -p <port> [--encrypt]")
         exit(1)
 
-    cs = CovertServer(args.bind, args.port, validKey=False, encrypt=args.encrypt, verbose=args.verbose)
-    rawOutput("lo", cs)
+    cs = CovertServer(args.bind, args.port, encrypt=args.encrypt, verbose=args.verbose)
+    if args.test:
+        testMode(cs)
+    else:
+        rawOutput("lo", cs)
