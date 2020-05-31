@@ -16,12 +16,13 @@ import ctypes
 import struct
 
 class CovertClient:
-    def __init__(self, servername, port, key=True, encrypt=True, groups=SUPPORTED_GROUPS, symkey=SYMMETRIC_KEY):
+    def __init__(self, servername, port, key=True, encrypt=True, groups=SUPPORTED_GROUPS, symkey=SYMMETRIC_KEY, verbose=False):
         self.key = self.__genKey__(key)
         self.groups = groups
         self.encrypt = encrypt
         self.tlsClient = TLSClient(servername, port)
         self.cipher = AESCipher(symkey)
+        self.verbose = verbose
 
 
     def __genKey__(self, key):
@@ -213,6 +214,10 @@ class CovertClient:
 
     def sendrecv(self, byteArray):
         fragments = self.__fragment__(byteArray)
+        if self.verbose:
+            print(f"Sending {len(byteArray)} bytes...")
+            printBytes(byteArray)
+
         for f in fragments:
             self.__hello__(f)
             self.recv()
@@ -266,8 +271,6 @@ def rawInput(interface, cc):
             continue
 
         prototype, packet = tmp
-        print(f"\rCount: {count}", end="")
-        # print(f"\rCount: {count}, bytes: {len(packet)}", end="")
         cc.sendrecv(packet)
 
 
@@ -285,6 +288,7 @@ if __name__ == "__main__":
     parser.add_argument('--test', action='store_true', help='Send a test message')
     parser.add_argument('-s', '--server', help='The server IP or domain.')
     parser.add_argument('-p', '--port', type=int, choices=range(1, 65536), help='The server port.')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Output all (unencrypted) bytes sent to the covert channel server to stdout')
     args = parser.parse_args()
 
     if args.server is None or args.port is None:
@@ -300,7 +304,7 @@ if __name__ == "__main__":
                 exit(1)
             supportedGroups.append(NAME_TO_GROUP_MAP[group])
 
-    cc = CovertClient(args.server, args.port, key=args.key, encrypt=args.encrypt, groups=supportedGroups)
+    cc = CovertClient(args.server, args.port, key=args.key, encrypt=args.encrypt, groups=supportedGroups, verbose=args.verbose)
     if args.test:
         test(cc)
     else:

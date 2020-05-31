@@ -7,12 +7,13 @@ from Covert import COVERT_KEY_LENGTHS, SYMMETRIC_KEY
 import socket
 
 class CovertServer:
-    def __init__(self, servername, port, key=None, validKey=True, encrypt=True, symkey=SYMMETRIC_KEY):
+    def __init__(self, servername, port, key=None, validKey=True, encrypt=True, symkey=SYMMETRIC_KEY, verbose=False):
         self.key = key
         self.validKey = validKey
         self.encrypt = encrypt
         self.tlsServer = TLSServer(servername, port, key)
         self.cipher = AESCipher(symkey)
+        self.verbose = verbose
 
     def __secpCovertMessage__(self, group, key, offset, bigger_bool):
         l = COVERT_KEY_LENGTHS[group]
@@ -152,7 +153,11 @@ class CovertServer:
                 msgs.append(byteArray)
                 self.tlsServer.handshakeFailure(socket)
 
-        return b''.join(msgs)
+        msg = b''.join(msgs)
+        if self.verbose:
+            print(f"Received {len(msg)} bytes")
+            printBytes(msg)
+        return msg
 
 
 def rawOutput(interface, cs):
@@ -163,7 +168,6 @@ def rawOutput(interface, cs):
     while True:
         data = cs.recvfail()
         count += 1
-        print(f"\rCount: {count}", end="")
         frame = b'\x00\x00\x00\x00\x00\x00' + b'\x00\x00\x00\x00\x00\x00' + ethertype + data
         rawSocket.send(frame)
 
@@ -176,11 +180,12 @@ if __name__ == "__main__":
     # parser.add_argument('--key', action='store_true', help='Use one public key as an actual TLS key') #TODO: implement this
     parser.add_argument('-b', '--bind', help='The server IP or domain.')
     parser.add_argument('-p', '--port', type=int, choices=range(1, 65536), help='The server port.')
+    parser.add_argument('-v', '--verbose', action='store_true', help='Output all (unencrypted) bytes received by the covert channel client to stdout')
     args = parser.parse_args()
 
     if args.bind is None or args.port is None:
         print("Usage: python3 CovertServer.py -b <bind to IP/Domain> -p <port> [--encrypt]")
         exit(1)
 
-    cs = CovertServer(args.bind, args.port, validKey=False, encrypt=args.encrypt)
+    cs = CovertServer(args.bind, args.port, validKey=False, encrypt=args.encrypt, verbose=args.verbose)
     rawOutput("lo", cs)

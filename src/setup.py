@@ -45,6 +45,10 @@ if __name__ == "__main__":
                 cleanServer()
             else:
                 server(sys.argv[2])
+        else:
+            print("Usage: python3 setup.py client/server [<IP>] [clean]")
+            print("Example: python3 setup.py client 10.0.0.1/24")
+            print("Example: python3 setup.py client clean")
     else:
         print("Usage: python3 setup.py client/server [<IP>] [clean]")
         print("Example: python3 setup.py client 10.0.0.1/24")
